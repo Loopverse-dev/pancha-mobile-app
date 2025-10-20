@@ -31,6 +31,15 @@ const RootLayout = (): React.JSX.Element => {
               navigationBarHidden: true,
             }} 
           />
+          <Stack.Screen 
+            name="user-selection" 
+            options={{ 
+              headerShown: false,
+              statusBarStyle: 'dark',
+              statusBarTranslucent: true,
+              navigationBarHidden: true,
+            }} 
+          />
           <Stack.Screen name="login" />
           <Stack.Screen name="(tabs)" />
         </Stack>
