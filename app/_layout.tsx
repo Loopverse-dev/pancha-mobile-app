@@ -1,24 +1,42 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
+import { Stack } from 'expo-router'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
+import { ErrorBoundary } from '@/components'
+import { useEffect } from 'react'
+import * as SplashScreen from 'expo-splash-screen'
+import '../global.css'
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
+// Keep the splash screen visible while we fetch resources
+SplashScreen.preventAutoHideAsync()
 
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
+const RootLayout = (): React.JSX.Element => {
+  useEffect(() => {
+    // Hide the native splash screen after a short delay
+    const timer = setTimeout(() => {
+      SplashScreen.hideAsync()
+    }, 1000)
 
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
+    return () => clearTimeout(timer)
+  }, [])
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
-  );
+    <SafeAreaProvider>
+      <ErrorBoundary>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen 
+            name="splash" 
+            options={{ 
+              headerShown: false,
+              statusBarStyle: 'dark',
+              statusBarTranslucent: true,
+              navigationBarHidden: true,
+            }} 
+          />
+          <Stack.Screen name="login" />
+          <Stack.Screen name="(tabs)" />
+        </Stack>
+      </ErrorBoundary>
+    </SafeAreaProvider>
+  )
 }
+
+export default RootLayout
