@@ -9,16 +9,17 @@ const UserSelectionScreen = (): React.JSX.Element => {
 
   const handleReaderPress = async () => {
     // Store user type and mark splash as seen, then navigate to login
+    // Flow: login → enter-pin → choose-child → home
     await AsyncStorage.setItem('userType', 'reader')
     await AsyncStorage.setItem('hasSeenSplash', 'true')
     router.replace('/login')
   }
 
   const handleAuthorPress = async () => {
-    // Store user type and mark splash as seen, then navigate to login
+    // Store user type and mark splash as seen, then navigate to choose avatar
     await AsyncStorage.setItem('userType', 'author')
     await AsyncStorage.setItem('hasSeenSplash', 'true')
-    router.replace('/login')
+    router.replace('/choose-avatar')
   }
 
   return (
@@ -31,7 +32,6 @@ const UserSelectionScreen = (): React.JSX.Element => {
       <StatusBar
         barStyle="dark-content"
         backgroundColor={Colors.splashBackground}
-        translucent={true}
       />
       <View
         style={{

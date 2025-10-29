@@ -13,35 +13,45 @@ import { useRouter } from 'expo-router'
 import { useState } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Colors, Spacing } from '@/constants'
+import { Ionicons } from '@expo/vector-icons'
 
-const LoginScreen = (): React.JSX.Element => {
+const SignUpScreen = (): React.JSX.Element => {
   const router = useRouter()
+  const [fullName, setFullName] = useState('')
+  const [phoneNumber, setPhoneNumber] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [agreeToTerms, setAgreeToTerms] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  const handleLogin = async () => {
-    if (!email || !password) {
-      alert('Please enter email and password')
+  const handleSignUp = async () => {
+    if (!fullName || !phoneNumber || !email || !password) {
+      alert('Please fill in all fields')
+      return
+    }
+
+    if (!agreeToTerms) {
+      alert('Please agree to the Terms and Conditions')
       return
     }
 
     setLoading(true)
 
-    // Simulate login (replace with actual API call)
+    // Simulate sign up (replace with actual API call)
     setTimeout(async () => {
       try {
-        // Store user data to indicate they've logged in
+        // Store user data
         await AsyncStorage.setItem('userLoggedIn', 'true')
         await AsyncStorage.setItem('userEmail', email)
+        await AsyncStorage.setItem('userFullName', fullName)
+        await AsyncStorage.setItem('userPhone', phoneNumber)
         
         // Check user type to determine navigation
         const userType = await AsyncStorage.getItem('userType')
         
         setLoading(false)
         
-        // If reader, go to choose-child → choose-avatar → enter-pin → home
-        // If author, go directly to home
+        // Navigate based on user type
         if (userType === 'reader') {
           router.replace('/choose-child')
         } else {
@@ -49,18 +59,13 @@ const LoginScreen = (): React.JSX.Element => {
         }
       } catch {
         setLoading(false)
-        alert('Login failed. Please try again.')
+        alert('Sign up failed. Please try again.')
       }
     }, 1000)
   }
 
-  const handleSignUp = () => {
-    // Navigate to sign up screen
-    router.push('/signup')
-  }
-
-  const handleForgotPassword = () => {
-    alert('Forgot password functionality coming soon!')
+  const handleSignIn = () => {
+    router.push('/login')
   }
 
   return (
@@ -80,41 +85,41 @@ const LoginScreen = (): React.JSX.Element => {
             style={{
               width: '100%',
               height: 200,
-              overflow: 'hidden',
-              borderBottomLeftRadius: 32,
-              borderBottomRightRadius: 32,
+              alignItems: 'center',
+              justifyContent: 'center',
+              paddingTop: 20,
             }}
           >
             <Image
-              source={require('@/assets/images/1-SI.png')}
-              style={{ width: '100%', height: '100%' }}
-              resizeMode="cover"
+              source={require('@/assets/images/elephant-reader.png')}
+              style={{ width: 180, height: 180 }}
+              resizeMode="contain"
             />
           </View>
 
-          {/* Login Form Container */}
+          {/* Sign Up Form Container */}
           <View
             style={{
               flex: 1,
               paddingHorizontal: Spacing.screenPadding + 8,
-              paddingTop: 32,
+              paddingTop: 16,
               paddingBottom: 24,
             }}
           >
             {/* Title */}
             <Text
               style={{
-                fontSize: 24,
+                fontSize: 22,
                 fontWeight: '600',
                 color: Colors.splashButton,
                 marginBottom: 24,
                 textAlign: 'center',
               }}
             >
-              Login to account
+              Create an account
             </Text>
 
-            {/* Username Input */}
+            {/* Full Name Input */}
             <View style={{ marginBottom: 16 }}>
               <TextInput
                 style={{
@@ -130,7 +135,57 @@ const LoginScreen = (): React.JSX.Element => {
                   shadowRadius: 3,
                   elevation: 2,
                 }}
-                placeholder="Username (Email Address)"
+                placeholder="Full Name"
+                placeholderTextColor={Colors.gray400}
+                value={fullName}
+                onChangeText={setFullName}
+                autoCapitalize="words"
+                autoComplete="name"
+              />
+            </View>
+
+            {/* Phone Number Input */}
+            <View style={{ marginBottom: 16 }}>
+              <TextInput
+                style={{
+                  backgroundColor: 'white',
+                  borderRadius: 12,
+                  paddingHorizontal: 16,
+                  paddingVertical: 14,
+                  fontSize: 15,
+                  color: Colors.text,
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.1,
+                  shadowRadius: 3,
+                  elevation: 2,
+                }}
+                placeholder="Phone Number"
+                placeholderTextColor={Colors.gray400}
+                value={phoneNumber}
+                onChangeText={setPhoneNumber}
+                keyboardType="phone-pad"
+                autoComplete="tel"
+              />
+            </View>
+
+            {/* Email Input */}
+            <View style={{ marginBottom: 16 }}>
+              <TextInput
+                style={{
+                  backgroundColor: 'white',
+                  borderRadius: 12,
+                  paddingHorizontal: 16,
+                  paddingVertical: 14,
+                  fontSize: 15,
+                  color: Colors.text,
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.1,
+                  shadowRadius: 3,
+                  elevation: 2,
+                }}
+                placeholder="Email Address (Username)"
                 placeholderTextColor={Colors.gray400}
                 value={email}
                 onChangeText={setEmail}
@@ -141,7 +196,7 @@ const LoginScreen = (): React.JSX.Element => {
             </View>
 
             {/* Password Input */}
-            <View style={{ marginBottom: 8 }}>
+            <View style={{ marginBottom: 16 }}>
               <TextInput
                 style={{
                   backgroundColor: 'white',
@@ -166,25 +221,43 @@ const LoginScreen = (): React.JSX.Element => {
               />
             </View>
 
-            {/* Forgot Password */}
+            {/* Terms and Conditions Checkbox */}
             <TouchableOpacity
-              onPress={handleForgotPassword}
-              style={{ alignSelf: 'flex-end', marginBottom: 24 }}
+              onPress={() => setAgreeToTerms(!agreeToTerms)}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 24,
+              }}
             >
-              <Text
+              <View
                 style={{
-                  fontSize: 13,
-                  color: Colors.text,
-                  fontWeight: '500',
+                  width: 20,
+                  height: 20,
+                  borderRadius: 4,
+                  borderWidth: 2,
+                  borderColor: agreeToTerms ? Colors.splashButton : Colors.gray400,
+                  backgroundColor: agreeToTerms ? Colors.splashButton : 'transparent',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginRight: 8,
                 }}
               >
-                Forgot Password?
+                {agreeToTerms && (
+                  <Ionicons name="checkmark" size={14} color="white" />
+                )}
+              </View>
+              <Text style={{ fontSize: 13, color: Colors.text }}>
+                I agree with the{' '}
+                <Text style={{ color: Colors.splashButton, fontWeight: '600' }}>
+                  Terms and Conditions
+                </Text>
               </Text>
             </TouchableOpacity>
 
-            {/* Sign In Button */}
+            {/* Sign Up Button */}
             <TouchableOpacity
-              onPress={handleLogin}
+              onPress={handleSignUp}
               disabled={loading}
               style={{
                 backgroundColor: Colors.splashButton,
@@ -210,23 +283,23 @@ const LoginScreen = (): React.JSX.Element => {
                   letterSpacing: 1,
                 }}
               >
-                {loading ? 'SIGNING IN...' : 'SIGN IN'}
+                {loading ? 'SIGNING UP...' : 'SIGN UP'}
               </Text>
             </TouchableOpacity>
 
-            {/* Sign Up Link */}
+            {/* Sign In Link */}
             <View
               style={{
                 flexDirection: 'row',
                 justifyContent: 'center',
                 alignItems: 'center',
-                marginTop: 32,
+                marginTop: 24,
               }}
             >
               <Text style={{ fontSize: 14, color: Colors.text }}>
-                Don&apos;t have an account ?{' '}
+                Already have an account ?{' '}
               </Text>
-              <TouchableOpacity onPress={handleSignUp}>
+              <TouchableOpacity onPress={handleSignIn}>
                 <Text
                   style={{
                     fontSize: 14,
@@ -234,7 +307,7 @@ const LoginScreen = (): React.JSX.Element => {
                     fontWeight: '600',
                   }}
                 >
-                  Sign Up
+                  Sign In
                 </Text>
               </TouchableOpacity>
             </View>
@@ -245,4 +318,4 @@ const LoginScreen = (): React.JSX.Element => {
   )
 }
 
-export default LoginScreen
+export default SignUpScreen

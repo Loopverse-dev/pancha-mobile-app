@@ -82,8 +82,7 @@ const SplashScreen = (): React.JSX.Element => {
     >
       <StatusBar 
         barStyle="dark-content" 
-        backgroundColor={Colors.splashBackground} 
-        translucent={true}
+        backgroundColor={Colors.splashBackground}
       />
       <View 
         style={{ 
