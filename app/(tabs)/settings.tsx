@@ -3,7 +3,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
 import { useState } from 'react'
 import { router } from 'expo-router'
-import AsyncStorage from '@react-native-async-storage/async-storage'
+import { authService } from '@/services/authService'
 
 const Settings = (): React.JSX.Element => {
   const [darkMode, setDarkMode] = useState(false)
@@ -22,12 +22,8 @@ const Settings = (): React.JSX.Element => {
           style: 'destructive',
           onPress: async () => {
             try {
-              // Clear all user session data
-              await AsyncStorage.multiRemove([
-                'userLoggedIn',
-                'userEmail',
-                'onboardingComplete',
-              ])
+              // Sign out from Firebase
+              await authService.signOut()
               // Navigate to login screen
               router.replace('/login')
             } catch (error) {

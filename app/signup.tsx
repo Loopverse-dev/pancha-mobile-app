@@ -8,12 +8,13 @@ import {
   Image,
   ScrollView,
   StatusBar,
+  Alert,
 } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useState } from 'react'
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Colors, Spacing } from '@/constants'
 import { Ionicons } from '@expo/vector-icons'
+import { authService } from '@/services/authService'
 
 const SignUpScreen = (): React.JSX.Element => {
   const router = useRouter()
@@ -26,42 +27,42 @@ const SignUpScreen = (): React.JSX.Element => {
 
   const handleSignUp = async () => {
     if (!fullName || !phoneNumber || !email || !password) {
-      alert('Please fill in all fields')
+      Alert.alert('Error', 'Please fill in all fields')
       return
     }
 
     if (!agreeToTerms) {
-      alert('Please agree to the Terms and Conditions')
+      Alert.alert('Error', 'Please agree to the Terms and Conditions')
       return
     }
 
     setLoading(true)
+    console.log('[SignUp] Starting sign up process...')
 
-    // Simulate sign up (replace with actual API call)
-    setTimeout(async () => {
-      try {
-        // Store user data
-        await AsyncStorage.setItem('userLoggedIn', 'true')
-        await AsyncStorage.setItem('userEmail', email)
-        await AsyncStorage.setItem('userFullName', fullName)
-        await AsyncStorage.setItem('userPhone', phoneNumber)
-        
-        // Check user type to determine navigation
-        const userType = await AsyncStorage.getItem('userType')
-        
-        setLoading(false)
-        
-        // Navigate based on user type
-        if (userType === 'reader') {
-          router.replace('/choose-child')
-        } else {
-          router.replace('/(tabs)')
-        }
-      } catch {
-        setLoading(false)
-        alert('Sign up failed. Please try again.')
-      }
-    }, 1000)
+    try {
+      // Sign up with Firebase
+      console.log('[SignUp] Calling authService.signUp...')
+      const user = await authService.signUp(email, password, {
+        email,
+        fullName,
+        phoneNumber,
+        userType: 'reader' // Default to reader, can be changed based on user selection
+      })
+
+      console.log('[SignUp] Sign up successful, user:', user.uid)
+      console.log('[SignUp] Navigating to /choose-child...')
+      
+      setLoading(false)
+      
+      // Navigate to choose child screen for readers
+      router.replace('/choose-child')
+      
+      console.log('[SignUp] Navigation command executed')
+    } catch (error: any) {
+      console.error('[SignUp] Sign up failed:', error)
+      setLoading(false)
+      Alert.alert('Sign Up Failed', error.message || 'Please try again.')
+    }
   }
 
   const handleSignIn = () => {

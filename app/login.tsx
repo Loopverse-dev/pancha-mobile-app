@@ -8,11 +8,12 @@ import {
   Image,
   ScrollView,
   StatusBar,
+  Alert,
 } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useState } from 'react'
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Colors, Spacing } from '@/constants'
+import { authService } from '@/services/authService'
 
 const LoginScreen = (): React.JSX.Element => {
   const router = useRouter()
@@ -22,36 +23,31 @@ const LoginScreen = (): React.JSX.Element => {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      alert('Please enter email and password')
+      Alert.alert('Error', 'Please enter email and password')
       return
     }
 
     setLoading(true)
 
-    // Simulate login (replace with actual API call)
-    setTimeout(async () => {
-      try {
-        // Store user data to indicate they've logged in
-        await AsyncStorage.setItem('userLoggedIn', 'true')
-        await AsyncStorage.setItem('userEmail', email)
-        
-        // Check user type to determine navigation
-        const userType = await AsyncStorage.getItem('userType')
-        
-        setLoading(false)
-        
-        // If reader, go to choose-child → choose-avatar → enter-pin → home
-        // If author, go directly to home
-        if (userType === 'reader') {
-          router.replace('/choose-child')
-        } else {
-          router.replace('/(tabs)')
-        }
-      } catch {
-        setLoading(false)
-        alert('Login failed. Please try again.')
+    try {
+      // Sign in with Firebase
+      const user = await authService.signIn(email, password)
+      
+      // Get user data from Firestore
+      const userData = await authService.getUserData(user.uid)
+      
+      setLoading(false)
+      
+      // Navigate based on user type
+      if (userData?.userType === 'reader') {
+        router.replace('/choose-child')
+      } else {
+        router.replace('/(tabs)')
       }
-    }, 1000)
+    } catch (error: any) {
+      setLoading(false)
+      Alert.alert('Login Failed', error.message || 'Please try again.')
+    }
   }
 
   const handleSignUp = () => {

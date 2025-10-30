@@ -26,26 +26,32 @@ const SplashScreen = (): React.JSX.Element => {
         withTiming(1, { duration: 200 })
       )
 
-      // Check if user has logged in before
+      // Check user status
       const userLoggedIn = await AsyncStorage.getItem('userLoggedIn')
       const hasSeenSplash = await AsyncStorage.getItem('hasSeenSplash')
+      const onboardingComplete = await AsyncStorage.getItem('onboardingComplete')
 
       console.log('Splash Screen - userLoggedIn:', userLoggedIn)
       console.log('Splash Screen - hasSeenSplash:', hasSeenSplash)
+      console.log('Splash Screen - onboardingComplete:', onboardingComplete)
 
       // Wait for animation to complete
       await new Promise(resolve => setTimeout(resolve, 1500))
 
-      if (userLoggedIn === 'true') {
-        // User has logged in before, show logo briefly then go to home
+      if (userLoggedIn === 'true' && onboardingComplete === 'true') {
+        // User has completed onboarding, go to home
         console.log('Navigating to tabs')
         router.replace('/(tabs)')
+      } else if (userLoggedIn === 'true' && onboardingComplete !== 'true') {
+        // User logged in but hasn't completed onboarding, go to choose-child
+        console.log('Navigating to choose-child')
+        router.replace('/choose-child')
       } else if (hasSeenSplash === 'true') {
-        // User has seen splash but not logged in, show logo briefly then go to login
+        // User has seen splash but not logged in, go to login
         console.log('Navigating to login')
         router.replace('/login')
       } else {
-        // First time user, wait for full animation then go to user selection
+        // First time user, go to user selection
         console.log('Navigating to user-selection')
         router.replace('/user-selection')
       }
